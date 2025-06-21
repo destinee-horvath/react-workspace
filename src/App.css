@@ -108,10 +108,11 @@ input[type="color"].square-input::-webkit-color-swatch {
   border-radius: 0;
 }
 
+
 input {
   border: 1px solid var(--icon-color);
   background-color: var(--input-bg-color);
-  color: var(--icon-color);
+  color: black;
   padding: 8px;
   border-radius: 5px;
   width: 350px;
@@ -122,7 +123,7 @@ input {
 
 input::placeholder {
   color: #555555;
-  opacity: 0.8;
+  opacity: 0.7;
 }
 
 input[type="date"] {
