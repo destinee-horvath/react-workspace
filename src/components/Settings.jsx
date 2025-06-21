@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Popup from './popups/DeleteConfirmation' 
 
 const MIN_FONT_SIZE = 12
 const MAX_FONT_SIZE = 30
@@ -35,6 +36,7 @@ export default function Settings() {
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || '16px')
   const [fileName, setFileName] = useState('No file chosen')
   const [message, setMessage] = useState('')
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   const fontSizeNumber = parseInt(fontSize, 10) || MIN_FONT_SIZE
 
@@ -69,9 +71,10 @@ export default function Settings() {
   }
 
   const handleReset = () => {
-    const confirmed = window.confirm('Are you sure you want to reset settings to default?');
-    if (!confirmed) return;
+    setShowResetConfirm(true)
+  }
 
+  const handleResetConfirmed = () => {
     setBgColour(defaultSettings.bgColour);
     setBgImage(defaultSettings.bgImage);
     setNavColour(defaultSettings.navColour);
@@ -81,6 +84,11 @@ export default function Settings() {
     localStorage.clear();
     setMessage('Settings reset to default.');
     setTimeout(() => setMessage(''), 3000);
+    setShowResetConfirm(false);
+  }
+
+  const handleResetCancelled = () => {
+    setShowResetConfirm(false);
   }
 
   const increaseFontSize = () => {
@@ -161,7 +169,7 @@ export default function Settings() {
       </div>
 
       <div style={{ marginBottom: '20px' , padding: '0 10%'}}>
-        <label htmlFor="file-upload" style={{ cursor: 'pointer', padding: '8px 12px', border: '1px solid #ccc', borderRadius: '5px', display: 'inline-block' }}>
+        <label htmlFor="file-upload" style={{ cursor: 'pointer', padding: '8px 12px', border: '1px solid var(--text-color)', borderRadius: '5px', display: 'inline-block' }}>
           Upload File
         </label>
         <input
@@ -205,6 +213,7 @@ export default function Settings() {
         <label>
           Font Family: 
           <select 
+            className='custom-select'
             value={fontFamily} 
             onChange={e => setFontFamily(e.target.value)} 
             style={{ marginLeft: '10px', fontSize: 'var(--font-size)' }}
@@ -221,7 +230,30 @@ export default function Settings() {
 
       <div style={{ marginBottom: '20px' , padding: '0 10%'}}>
         <label>Font Size: </label>
-        <button onClick={decreaseFontSize} style={{ marginLeft: '10px', padding: '4px 10px' }}>−</button>
+        <button 
+          onClick={decreaseFontSize} 
+          style={{ 
+            marginLeft: '10px', 
+            padding: '6px 14px', 
+            fontSize: '18px', 
+            fontWeight: 'bold',
+            borderRadius: '8px', 
+            border: '1px solid var(--text-color)', 
+            backgroundColor: 'var(--bg-color)', 
+            color: 'var(--text-color)', 
+            cursor: 'pointer',
+            transition: 'background-color 0.3s ease, color 0.3s ease',
+            userSelect: 'none',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = 'var(--icon-color)';
+            e.currentTarget.style.color = 'var(--nav-color)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'var(--bg-color)';
+            e.currentTarget.style.color = 'var(--text-color)';
+          }}
+        >−</button>
         <input 
           type="number" 
           value={fontSizeNumber} 
@@ -230,8 +262,30 @@ export default function Settings() {
           min={MIN_FONT_SIZE} 
           max={MAX_FONT_SIZE}
         />
-        <button onClick={increaseFontSize} style={{ padding: '4px 10px' }}>+</button>
-        <span> px</span>
+        <button 
+          onClick={increaseFontSize} 
+          style={{ 
+            padding: '6px 14px', 
+            fontSize: '18px', 
+            fontWeight: 'bold',
+            borderRadius: '8px', 
+            border: '1px solid var(--text-color)', 
+            backgroundColor: 'var(--bg-color)', 
+            color: 'var(--text-color)', 
+            cursor: 'pointer',
+            transition: 'background-color 0.3s ease, color 0.3s ease',
+            userSelect: 'none',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = 'var(--icon-color)';
+            e.currentTarget.style.color = 'var(--nav-color)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'var(--bg-color)';
+            e.currentTarget.style.color = 'var(--text-color)';
+          }}
+        >+</button>
+      <span> px</span>
       </div>
 
       <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'center' }}>
@@ -239,7 +293,13 @@ export default function Settings() {
         <button className='button-rectangle' onClick={handleReset} style={{ padding: '8px 20px' }}>Reset</button>
       </div>
 
-      {message && <p style={{ color: 'green', marginTop: '20px' }}>{message}</p>}
+      {showResetConfirm && (
+        <Popup
+          message="Are you sure you want to reset settings to default?"
+          onConfirm={handleResetConfirmed}
+          onCancel={handleResetCancelled}
+        />
+      )}
     </div>
   )
 }

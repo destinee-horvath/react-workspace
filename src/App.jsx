@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import Home from './components/Home'
 import Sidebar from './components/Sidebar'
 
@@ -37,11 +37,15 @@ function App() {
     const iconColour = getContrastYIQ(navColour);
     document.documentElement.style.setProperty('--icon-color', iconColour);
 
+    // opposite color for input background
+    const inputBgColour = iconColour === 'black' ? '#fff' : '#000';
+    document.documentElement.style.setProperty('--input-bg-color', inputBgColour);
   }, []); 
 
   return (
     <>
       <Sidebar />
+      <TimeDisplay />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/todo" element={<ToDo />} />
@@ -54,3 +58,27 @@ function App() {
 }
 
 export default App
+
+
+function TimeDisplay() {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const intervalId = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: '10px',
+      right: '10px', 
+      color: 'var(--text-color)',
+      fontFamily: 'var(--font-family)',
+      fontSize: '18px',
+      zIndex: 9999
+    }}>
+      {time.toLocaleTimeString()}
+    </div>
+  );
+}
