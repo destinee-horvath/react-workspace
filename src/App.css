@@ -170,6 +170,7 @@ input {
 }
 
 
+
 .file-name {  /*for settings - display filename*/
   font-style: italic;
   color: var(--text-color);

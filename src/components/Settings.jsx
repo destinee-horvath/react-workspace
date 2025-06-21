@@ -70,21 +70,51 @@ export default function Settings() {
     setTimeout(() => setMessage(''), 3000)
   }
 
-  const handleReset = () => {
-    setShowResetConfirm(true)
+  const handleResetTheme = () => {
+    setShowResetConfirm(true);
+    setResetType('theme');
   }
 
+  const handleResetAll = () => {
+    setShowResetConfirm(true);
+    setResetType('all');
+  }
+
+  const [resetType, setResetType] = useState('theme'); 
+
   const handleResetConfirmed = () => {
-    setBgColour(defaultSettings.bgColour);
-    setBgImage(defaultSettings.bgImage);
-    setNavColour(defaultSettings.navColour);
-    setTextColour(defaultSettings.textColour);
-    setFontFamily(defaultSettings.fontFamily);
-    setFontSize('16px'); 
-    localStorage.clear();
-    setMessage('Settings reset to default.');
+    if (resetType === 'theme') {
+      setBgColour(defaultSettings.bgColour);
+      setBgImage(defaultSettings.bgImage);
+      setNavColour(defaultSettings.navColour);
+      setTextColour(defaultSettings.textColour);
+      setFontFamily(defaultSettings.fontFamily);
+      setFontSize('16px');
+      
+      localStorage.removeItem('bgColour');
+      localStorage.removeItem('bgImage');
+      localStorage.removeItem('navColour');
+      localStorage.removeItem('textColour');
+      localStorage.removeItem('fontFamily');
+      localStorage.removeItem('fontSize');
+
+      setMessage('Theme settings reset to default.');
+    } 
+    else if (resetType === 'all') {
+      localStorage.clear();
+
+      setBgColour(defaultSettings.bgColour);
+      setBgImage(defaultSettings.bgImage);
+      setNavColour(defaultSettings.navColour);
+      setTextColour(defaultSettings.textColour);
+      setFontFamily(defaultSettings.fontFamily);
+      setFontSize('16px');
+
+      setMessage('All data and settings reset.');
+    }
     setTimeout(() => setMessage(''), 3000);
     setShowResetConfirm(false);
+    setResetType('theme'); 
   }
 
   const handleResetCancelled = () => {
@@ -288,9 +318,10 @@ export default function Settings() {
       <span> px</span>
       </div>
 
-      <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'center' }}>
-        <button className='button-rectangle' onClick={handleSave} style={{ marginRight: '15px', padding: '8px 20px' }}>Save</button>
-        <button className='button-rectangle' onClick={handleReset} style={{ padding: '8px 20px' }}>Reset</button>
+      <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'center', gap: '15px' }}>
+        <button className='button-rectangle' onClick={handleSave} style={{ padding: '8px 20px' }}>Save</button>
+        <button className='button-rectangle' onClick={handleResetTheme} style={{ padding: '8px 20px' }}>Reset Theme</button>
+        <button className='button-rectangle' onClick={handleResetAll} style={{ padding: '8px 20px', backgroundColor: '#cc4444', color: 'white' }}>Reset All</button>
       </div>
 
       {showResetConfirm && (
