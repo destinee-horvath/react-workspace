@@ -13,6 +13,8 @@ export default function ToDo() {
   const [priority, setPriority] = useState('Medium');
 
   const [editTaskId, setEditTaskId] = useState(null);
+  const [editDeadline, setEditDeadline] = useState('');
+  const [editPriority, setEditPriority] = useState('Medium');
   const [editTaskInput, setEditTaskInput] = useState('');
 
   const [showConfirm, setShowConfirm] = useState(false);
@@ -61,22 +63,33 @@ export default function ToDo() {
   };
 
   //edit task functionality
-  const startEditingTask = (id, text) => {
-    setEditTaskId(id);
-    setEditTaskInput(text);
+  const startEditingTask = (task) => {
+    setEditTaskId(task.id);
+    setEditTaskInput(task.text);
+    setEditDeadline(task.deadline || '');
+    setEditPriority(task.priority || 'None');
   };
 
   const cancelEdit = () => {
     setEditTaskId(null);
     setEditTaskInput('');
+    setEditDeadline('');
+    setEditPriority('None');
   };
 
   const saveEditedTask = (id) => {
     setTasks(tasks.map(task => 
-      task.id === id ? { ...task, text: editTaskInput } : task
+      task.id === id ? { 
+        ...task, 
+        text: editTaskInput, 
+        deadline: editDeadline, 
+        priority: editPriority 
+      } : task
     ));
     setEditTaskId(null);
     setEditTaskInput('');
+    setEditDeadline('');
+    setEditPriority('None');
   };
 
   //toggle completed state (the checkbox)
@@ -111,12 +124,13 @@ export default function ToDo() {
       <hr className='custom-hr' />
 
       {/* Input Row */}
-      <div style={{ marginBottom: '20px', paddingLeft: '150px' }}>
+      <div className="input-row">
         <input
           type="text"
           placeholder="Task"
           value={taskInput}
           onChange={(e) => setTaskInput(e.target.value)}
+          style={{ marginLeft: '10px', width: '40%' }}
         />
 
         <input
@@ -124,7 +138,7 @@ export default function ToDo() {
           defaultValue={deadline}
           ref={dateInputRef}
           onBlur={(e) => setDeadline(e.target.value)}
-          style={{ marginLeft: '10px' }}
+          style={{ marginLeft: '10px', width: '150px' }}
         />
 
         <select
@@ -190,11 +204,33 @@ export default function ToDo() {
               </td>
 
               <td style={{ padding: '10px' }}>
-                {task.deadline ? task.deadline : 'No deadline'}
+                {editTaskId === task.id ? (
+                  <input 
+                    type="date" 
+                    value={editDeadline} 
+                    onChange={e => setEditDeadline(e.target.value)} 
+                  />
+                ) : (
+                  task.deadline || 'No deadline'
+                )}
               </td>
 
               <td style={{ padding: '10px' }}>
-                {isOverdue(task.deadline) ? 'Overdue' : task.priority}
+                {editTaskId === task.id ? (
+                  <select 
+                    value={editPriority} 
+                    onChange={e => setEditPriority(e.target.value)} 
+                    className="custom-select"
+                    style={{ width: '100px' }}
+                  >
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                    <option value="None">None</option>
+                  </select>
+                ) : (
+                  isOverdue(task.deadline) ? 'Overdue' : task.priority
+                )}
               </td>
 
               <td style={{ padding: '10px', whiteSpace: 'nowrap' }}>
@@ -219,7 +255,7 @@ export default function ToDo() {
                   <>
                     <button 
                       className="button-rectangle-small" 
-                      onClick={() => startEditingTask(task.id, task.text)} 
+                      onClick={() => startEditingTask(task)} 
                       style={{ marginRight: '5px' }}
                     >
                       Edit

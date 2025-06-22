@@ -4,6 +4,8 @@ import Home from './components/Home'
 import Sidebar from './components/Sidebar'
 
 import ToDo from './components/ToDo'
+import Grades from './components/Grades'
+
 import Account from './components/Account'
 import Settings from './components/Settings'
 
@@ -49,6 +51,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/todo" element={<ToDo />} />
+        <Route path="/grades" element={<Grades />} />
         <Route path="/account" element={<Account />} />
         <Route path="/settings" element={<Settings />} />
 

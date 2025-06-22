@@ -5,6 +5,7 @@ Libraries:
 - tailwindcss
 - postcss
 - autoprefixer
+- react-beautiful-dnd --legacy-peer-deps 
 
 To build: 'npm run build'
 To run: `npm run dev'
