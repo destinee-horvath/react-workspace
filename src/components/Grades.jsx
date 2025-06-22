@@ -53,7 +53,7 @@ export default function Grades() {
   useEffect(() => {
     localStorage.setItem('grades_selectedSubject', selectedSubject);
   }, [selectedSubject]);
-  
+
 
   const handleAddSubject = () => {
   if (newSubject.trim() && !subjects.includes(newSubject.trim())) {
@@ -313,12 +313,17 @@ export default function Grades() {
       </div>
 
       {/* Filter by Subject */}
-      <div className="input-row">
-        <select onChange={e => setSelectedSubject(e.target.value)} value={selectedSubject} className="custom-select" style={{ }}>
-          <option value="All">All Subjects</option>
-          {subjects.map((subj, index) => <option key={index} value={subj}>{subj}</option>)}
-        </select>
+      <div style={{ width: '90%', margin: '0 auto', textAlign: 'left', paddingTop: '10px' }}>
+      <select 
+        onChange={e => setSelectedSubject(e.target.value)} 
+        value={selectedSubject} 
+        className="custom-select"
+      >
+        <option value="All">All Subjects</option>
+        {subjects.map((subj, index) => <option key={index} value={subj}>{subj}</option>)}
+      </select>
       </div>
+
 
       {/* Table */}
       <DragDropContext onDragEnd={onDragEnd}>

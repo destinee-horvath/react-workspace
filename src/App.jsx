@@ -2,9 +2,11 @@ import { Routes, Route } from 'react-router-dom'
 import { useState, useEffect } from 'react';
 import Home from './components/Home'
 import Sidebar from './components/Sidebar'
+import Timer from './components/Timer'
 
 import ToDo from './components/ToDo'
 import Grades from './components/Grades'
+import Schedule from './components/Schedule'
 
 import Account from './components/Account'
 import Settings from './components/Settings'
@@ -48,10 +50,14 @@ function App() {
     <>
       <Sidebar />
       <TimeDisplay />
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/todo" element={<ToDo />} />
         <Route path="/grades" element={<Grades />} />
+        <Route path="/schedule" element={<Schedule />} />
+        <Route path="/timer" element={<Timer />} />
+
         <Route path="/account" element={<Account />} />
         <Route path="/settings" element={<Settings />} />
 
