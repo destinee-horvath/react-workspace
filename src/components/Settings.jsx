@@ -252,8 +252,6 @@ export default function Settings() {
             <option value="Arial, sans-serif">Arial</option>
             <option value="'Courier New', monospace">Courier New</option>
             <option value="'Times New Roman', serif">Times New Roman</option>
-            <option value="'Georgia', serif">Georgia</option>
-            <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
           </select>
         </label>
       </div>

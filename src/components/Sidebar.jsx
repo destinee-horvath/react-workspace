@@ -23,6 +23,7 @@ export default function Sidebar() {
         <nav>
             <Link to="/">Home</Link>
             <Link to="/todo">To-Do</Link>
+            <Link to="/grades">Grades</Link>
             <Link to="/account">Account</Link>
             <Link to="/settings">Settings</Link>
 
