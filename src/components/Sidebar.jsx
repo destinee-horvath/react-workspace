@@ -24,9 +24,11 @@ export default function Sidebar() {
             <Link to="/">Home</Link>
             <Link to="/todo">To-Do</Link>
             <Link to="/grades">Grades</Link>
+            <Link to="/schedule">Schedule</Link>
+            <Link to="/timer">Timer</Link>
+
             <Link to="/account">Account</Link>
             <Link to="/settings">Settings</Link>
-
         </nav>
     </div>
 
