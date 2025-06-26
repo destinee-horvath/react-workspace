@@ -7,6 +7,7 @@ Libraries:
 - autoprefixer
 - react-beautiful-dnd --legacy-peer-deps 
 - date-fns --legacy-peer-deps
+- vite-plugin-pwa --legacy-peer-deps 
 
 To build: 'npm run build'
 To run: `npm run dev'
@@ -14,3 +15,9 @@ To run: `npm run dev'
 Versions: 
 - npm verbose node v22.16.0
 - npm verbose npm  v10.9.2
+
+
+To "download": 
+- `npm run build`
+- `npm run preview`
+- Right of address bar, click leftmost icon: ![alt text](image.png)

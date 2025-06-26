@@ -10,6 +10,10 @@ export default defineConfig({
       manifest: {
         name: 'Study Workspace App',
         short_name: 'StudyApp',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#000000',
+        theme_color: '#1a1a1a',
         icons: [
           {
             src: 'main-icon-512x512.png',
@@ -22,10 +26,6 @@ export default defineConfig({
             type: 'image/png'
           }
         ],
-        start_url: '/',
-        display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#000000'
       }
     })
   ]

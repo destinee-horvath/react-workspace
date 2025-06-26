@@ -11,15 +11,18 @@
 
 
 body {
+  margin: 0;
+  padding: 0;
   background-color: var(--bg-color);
   background-image: var(--bg-image);
   background-size: cover;
+  background-repeat: no-repeat;
   background-position: center;
   color: var(--text-color);
   font-family: var(--font-family);
-  font-size: var(--font-size, 16px);
+  font-size: var(--font-size);
+  transition: all 0.3s ease-in-out;
 }
-
 p {
   font-size: var(--font-size, 16px);
 }
