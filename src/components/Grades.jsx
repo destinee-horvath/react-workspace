@@ -442,7 +442,7 @@ export default function Grades() {
                                 <button
                                   className="button-rectangle-small"
                                   onClick={() => saveEditedTask(idx)}
-                                  style={{ marginRight: '5px' }}
+                                  style={{ marginRight: '5px', marginBottom: '5px' }}
                                 >
                                   Save
                                 </button>

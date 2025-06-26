@@ -6,6 +6,7 @@ Libraries:
 - postcss
 - autoprefixer
 - react-beautiful-dnd --legacy-peer-deps 
+- date-fns --legacy-peer-deps
 
 To build: 'npm run build'
 To run: `npm run dev'
