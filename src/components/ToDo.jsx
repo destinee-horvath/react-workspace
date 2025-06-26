@@ -23,6 +23,9 @@ export default function ToDo() {
   const isValidDate = (dateString) => /^\d{4}-\d{2}-\d{2}$/.test(dateString);
   const dateInputRef = useRef();
 
+  const getFontSize = () => getComputedStyle(document.documentElement).getPropertyValue('--font-size') || '10px';
+
+
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
@@ -138,7 +141,7 @@ export default function ToDo() {
           defaultValue={deadline}
           ref={dateInputRef}
           onBlur={(e) => setDeadline(e.target.value)}
-          style={{ marginLeft: '10px', width: '150px' }}
+          style={{ marginLeft: '10px', width: '150px' , fontSize: (parseInt(getFontSize()) - 3) + 'px' }}
         />
 
         <select
@@ -196,7 +199,7 @@ export default function ToDo() {
                     type="text" 
                     value={editTaskInput} 
                     onChange={(e) => setEditTaskInput(e.target.value)} 
-                    style={{ width: '90%' }} 
+                    style={{ width: '90%' , fontSize: (parseInt(getFontSize()) - 3) + 'px' }} 
                   />
                 ) : (
                   task.text
@@ -209,6 +212,7 @@ export default function ToDo() {
                     type="date" 
                     value={editDeadline} 
                     onChange={e => setEditDeadline(e.target.value)} 
+                    style={{maxWidth: '50px', fontSize: (parseInt(getFontSize()) - 3) + 'px' }}
                   />
                 ) : (
                   task.deadline || 'No deadline'

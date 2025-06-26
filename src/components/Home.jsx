@@ -25,6 +25,8 @@ function priorityToNumber(priority) {
 export default function Home() {
   const [userName, setUserName] = useState('');
   const [taskList, setTaskList] = useState([]);
+  const [isBirthday, setIsBirthday] = useState(false);
+  const [dob, setDob] = useState('');
 
   const sectionStyle = {
     border: '1px solid var(--text-color)',
@@ -42,7 +44,29 @@ export default function Home() {
     if (savedTasks) {
       setTaskList(JSON.parse(savedTasks));
     }
+
+    const savedDob = localStorage.getItem('dob');
+    if (savedDob) setDob(savedDob); 
   }, []);
+
+  //load stored date of birth from localStorage
+  useEffect(() => {
+  localStorage.setItem('dob', dob);
+
+  if (dob) {
+    const today = new Date();
+    const birthDate = new Date(dob);
+    if (
+      birthDate.getDate() === today.getDate() &&
+      birthDate.getMonth() === today.getMonth()
+    ) {
+      setIsBirthday(true);
+    } else {
+      setIsBirthday(false);
+    }
+  }
+}, [dob]);
+
 
   //toggle the completion status of a task and update storage
   const toggleTaskCompletion = (taskId) => {
@@ -83,7 +107,7 @@ export default function Home() {
       }}
     >
       <h1 style={{ textAlign: 'center' }}>
-        Hello {userName || 'Guest'}!
+        {isBirthday ? `🎉 Happy Birthday, ${userName}!` : `Hello, ${userName}`}
       </h1>
 
       <div

@@ -112,7 +112,7 @@ export default function Schedule() {
       <hr className='custom-hr' />
       <button 
         onClick={() => setSettingsOpen(true)} 
-        style={{ position: 'absolute', right: '20px', top: '40px' }}
+        style={{ position: 'absolute', right: '20px', top: '50px' }}
         className='button-rectangle'
       >
         Settings
@@ -282,7 +282,7 @@ export default function Schedule() {
                 onChange={(e) => setStartTime(parseInt(e.target.value))}
                 min="0"
                 max="23"
-                style={{maxWidth: '50px', marginRight: '10px', marginTop: '20px', fontSize: (parseInt(getFontSize()) - 3) + 'px' }}
+                style={{maxWidth: '50px', marginRight: '10px', marginTop: '20px', marginBottom: '10px', fontSize: (parseInt(getFontSize()) - 3) + 'px' }}
               />
             </label>
             <br />

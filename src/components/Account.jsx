@@ -8,6 +8,8 @@ export default function Account() {
     const [dob, setDob] = useState(() => localStorage.getItem('dob') || '')
     const [message, setMessage] = useState('')
 
+    const getFontSize = () => getComputedStyle(document.documentElement).getPropertyValue('--font-size') || '10px';
+
     const handleSave = () => {
         localStorage.setItem('name', name)
         localStorage.setItem('email', email)
@@ -41,7 +43,7 @@ export default function Account() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder='Name'
-          style={{ flex: 1 }}
+          style={{ flex: 1 , fontSize: (parseInt(getFontSize()) - 3) + 'px' }}
         />
       </div>
 
@@ -54,7 +56,7 @@ export default function Account() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder='Email'
-          style={{ flex: 1 }}
+          style={{ flex: 1 , fontSize: (parseInt(getFontSize()) - 3) + 'px' }}
         />
       </div>
 
@@ -67,7 +69,7 @@ export default function Account() {
           value={dob}
           onChange={(e) => setDob(e.target.value)}
           placeholder='Date of Birth'
-          style={{ flex: 1 }}
+          style={{ flex: 1 , fontSize: (parseInt(getFontSize()) - 3) + 'px' }}
         />
       </div>
 

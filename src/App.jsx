@@ -81,13 +81,22 @@ function TimeDisplay() {
     <div style={{
       position: 'fixed',
       top: '10px',
-      right: '10px', 
+      right: '10px',
       color: 'var(--text-color)',
       fontFamily: 'var(--font-family)',
       fontSize: '18px',
-      zIndex: 9999
+      textAlign: 'right',
+      zIndex: 9999,
     }}>
-      {time.toLocaleTimeString()}
+      <div>{time.toLocaleTimeString()}</div>
+      <div style={{ fontSize: '14px', marginTop: '4px' }}>
+        {time.toLocaleDateString(undefined, {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })}
+      </div>
     </div>
   );
 }

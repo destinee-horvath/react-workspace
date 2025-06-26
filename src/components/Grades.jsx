@@ -4,6 +4,8 @@ import EditSubjectsPopup from './popups/EditSubjectsPopup';
 import Popup from './popups/DeleteConfirmation'; 
 
 export default function Grades() {
+  const getFontSize = () => getComputedStyle(document.documentElement).getPropertyValue('--font-size') || '10px';
+
   const [subjects, setSubjects] = useState(() => {
     const saved = localStorage.getItem('grades_subjects');
     return saved ? JSON.parse(saved) : ['Math', 'Science'];
@@ -306,6 +308,8 @@ export default function Grades() {
           <option>Exam</option>
           <option>Assignment</option>
           <option>Quiz</option>
+          <option>Weekly Task</option>
+          <option>Other</option>
         </select>
         <input type="text" placeholder="Grade %" value={newTask.grade} onChange={e => setNewTask({ ...newTask, grade: e.target.value })} style={{ width: '80px' }} />
         <input type="number" placeholder="Weight %" value={newTask.weight} onChange={e => setNewTask({ ...newTask, weight: e.target.value })} style={{ width: '80px' }} />
@@ -384,7 +388,7 @@ export default function Grades() {
                                 {subjects.map((subj, i) => (
                                   <option key={i} value={subj}>{subj}</option>
                                 ))}
-                                <option value={editTaskData.subject}>{editTaskData.subject}</option> {/* allow new */}
+                                <option value={editTaskData.subject}>{editTaskData.subject}</option>
                               </select>
                             ) : (
                               task.subject
