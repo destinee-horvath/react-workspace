@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ScheduleTableOnly from './sub-components/ScheduleTableOnly'; 
 
 //check if a given date string is today
 function isDateToday(dateString) {
@@ -226,6 +227,17 @@ export default function Home() {
               </tbody>
             </table>
           )}
+        </section>
+
+        <section
+          style={{
+            border: '1px solid var(--text-color)',
+            borderRadius: '8px',
+            flex: '1 1 100%', 
+          }}
+        >
+          <h3 style={{  marginLeft: '10px'}}>Schedule</h3>
+          <ScheduleTableOnly />
         </section>
       </div>
     </div>
