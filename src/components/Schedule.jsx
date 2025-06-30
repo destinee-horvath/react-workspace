@@ -236,10 +236,10 @@ export default function Schedule() {
         }}
       >
         <thead>
-          <tr>
+            <tr>
             <th style={{ width: '10%' }}>Time</th>
             {daysSelect.map(day => (
-              <th key={day} style={{ width: `${90 / daysSelect.length}%` }}>{day}</th>
+              <th key={day}>{day}</th>
             ))}
           </tr>
         </thead>
@@ -249,88 +249,75 @@ export default function Schedule() {
             <tr key={time}>
               <td style={{ textAlign: 'center', border: '1px solid var(--text-color)' }}>{time}</td>
               {daysSelect.map(day => {
-                // Find all tasks that overlap this cell
-                const overlappingTasks = tasks.filter(task => {
+                // Find if a task starts at this cell
+                const startingTasks = tasks.filter(task =>
+                  task.day === day && getTimeIndex(task.time) === rowIndex
+                );
+
+                if (startingTasks.length > 0) {
+                  return startingTasks.map((task, idx) => {
+                    const rowSpan = Math.ceil(task.duration / interval);
+                    return (
+                      <td
+                        key={day + time + idx}
+                        rowSpan={rowSpan}
+                        style={{
+                          border: '1px solid var(--text-color)',
+                          padding: '2px',
+                          verticalAlign: 'top',
+                          position: 'relative',
+                          backgroundColor: task.color,
+                          color: 'black',
+                          minWidth: 0,
+                          maxWidth: '80px',
+                          boxSizing: 'border-box',
+                          cursor: 'pointer'
+                        }}
+                        title={task.name}
+                        onClick={e => {
+                          e.stopPropagation();
+                          setEditingTask({ ...task, original: task });
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          onChange={e => {
+                            e.stopPropagation();
+                            toggleCompleted(task);
+                          }}
+                          onClick={e => e.stopPropagation()}
+                          style={{ width: '12px', height: '12px', marginRight: '2px' }}
+                        />
+                        {task.name}
+                      </td>
+                    );
+                  });
+                }
+
+                // If this cell is covered by a task (but not the start), render null
+                const isCovered = tasks.some(task => {
                   if (task.day !== day) return false;
                   const taskStart = getTimeIndex(task.time);
                   const taskEnd = taskStart + Math.ceil(task.duration / interval);
-                  return rowIndex >= taskStart && rowIndex < taskEnd;
+                  return rowIndex > taskStart && rowIndex < taskEnd;
                 });
+                if (isCovered) return null;
 
-                // If no tasks, render an empty cell (add popup)
-                if (overlappingTasks.length === 0) {
-                  return (
-                    <td
-                      key={day + time}
-                      onClick={() => setCellTaskPopup({ day, time })}
-                      style={{
-                        border: '1px solid var(--text-color)',
-                        minHeight: '50px',
-                        padding: '2px',
-                        verticalAlign: 'top',
-                        cursor: 'pointer'
-                      }}
-                    />
-                  );
-                }
-
-                // Only render tasks that start at this cell (side by side)
-                const tasksToShow = overlappingTasks.filter(task => getTimeIndex(task.time) === rowIndex).slice(0, 3);
-                if (tasksToShow.length > 0) {
-                  const totalTasks = tasksToShow.length;
-                  return (
-                    <td
-                      key={day + time}
-                      style={{
-                        border: '1px solid var(--text-color)',
-                        padding: '2px',
-                        verticalAlign: 'top',
-                        position: 'relative',
-                      }}
-                    >
-                      <div style={{ display: 'flex', flexDirection: 'row', gap: '2px' }}>
-                        {tasksToShow.map((task, idx) => {
-                          const width = `${100 / totalTasks}%`;
-                          return (
-                            <div
-                              key={idx}
-                              title={task.name}
-                              onClick={e => {
-                                e.stopPropagation();
-                                setEditingTask({ ...task, original: task }); // Opens edit popup
-                              }}
-                              style={{
-                                flex: `1 0 ${width} - 2px`,
-                                backgroundColor: task.color,
-                                color: 'black',
-                                fontSize: '9px',
-                                whiteSpace: 'nowrap',
-                                padding: '1px 0px', 
-                                overflow: 'hidden',
-                                borderRadius: '4px',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={task.completed}
-                                onChange={e => {
-                                  e.stopPropagation();
-                                  toggleCompleted(task);
-                                }}
-                                onClick={e => e.stopPropagation()}
-                                style={{ width: '12px', height: '12px', marginRight: '2px' }}
-                              />
-                              {task.name}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </td>
-                  );
-                }
-
-                return null;
+                // Otherwise, render an empty cell
+                return (
+                  <td
+                    key={day + time}
+                    onClick={() => setCellTaskPopup({ day, time })}
+                    style={{
+                      border: '1px solid var(--text-color)',
+                      minHeight: '50px',
+                      padding: '2px',
+                      verticalAlign: 'top',
+                      cursor: 'pointer'
+                    }}
+                  />
+                );
               })}
             </tr>
           ))}
