@@ -1,24 +1,45 @@
 import { useState, useEffect } from 'react';
 import DeleteConfirmation from './popups/DeleteConfirmation'; 
 
-
 export default function Schedule() {
-  // Get CSS variables
   const getNavigationColor = () => getComputedStyle(document.documentElement).getPropertyValue('--nav-color') || '#ffffff';
   const getFontSize = () => getComputedStyle(document.documentElement).getPropertyValue('--font-size') || '10px';
 
   const daysSelect = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const [newTask, setNewTask] = useState({ name: '', day: 'Monday', time: '08:00', color: getNavigationColor().trim() });
+  const [newTask, setNewTask] = useState({ name: '', day: 'Monday', time: '08:00', color: getNavigationColor().trim(), duration: 60 });
   const [editingTask, setEditingTask] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [startTime, setStartTime] = useState(8);
   const [endTime, setEndTime] = useState(17);
-  const [interval, setInterval] = useState(60); // in minutes
+  const [interval, setInterval] = useState(60);
+  const [cellTaskDuration, setCellTaskDuration] = useState(60);
 
-  // Tasks state with localStorage 
+  const [times, setTimes] = useState([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('schedule-settings');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.startTime !== undefined) setStartTime(parsed.startTime);
+      if (parsed.endTime !== undefined) setEndTime(parsed.endTime);
+      if (parsed.interval !== undefined) setInterval(parsed.interval);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('schedule-settings', JSON.stringify({ startTime, endTime, interval }));
+    const generated = [];
+    for (let hour = startTime; hour <= endTime; hour++) {
+      for (let min = 0; min < 60; min += interval) {
+        generated.push(`${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+      }
+    }
+    setTimes(generated);
+  }, [startTime, endTime, interval]);
+
   const [tasks, setTasks] = useState(() => {
     const stored = localStorage.getItem('schedule-tasks');
-      return stored ? JSON.parse(stored) : [];
+    return stored ? JSON.parse(stored) : [];
   });
 
   useEffect(() => {
@@ -29,40 +50,37 @@ export default function Schedule() {
   const [cellTaskName, setCellTaskName] = useState('');
   const [cellTaskColor, setCellTaskColor] = useState(getNavigationColor().trim());
 
-  const [confirmation, setConfirmation] = useState({
-    message: '',
-    onConfirm: null,
-    onCancel: null,
-    taskToDelete: null,
-  });
-  
+  const [confirmation, setConfirmation] = useState({ message: '', onConfirm: null, onCancel: null, taskToDelete: null });
+
   const addTask = () => {
     if (!newTask.name.trim()) return;
-    setTasks([...tasks, { ...newTask, completed: false }]);
-    setNewTask({ name: '', day: 'Monday', time: times[0], color: '#00bfff' });
+    setTasks([...tasks, {
+      name: newTask.name,
+      day: newTask.day,
+      time: newTask.time,
+      color: newTask.color,
+      duration: newTask.duration,
+      completed: false
+    }]);
+    setNewTask(prev => ({ ...prev, name: '' }));
   };
 
-  // Edit a task (that is selected)
-  const editTask = (task) => setEditingTask({ ...task });
+  const editTask = (task) => setEditingTask({ ...task, original: task });
 
-  // Save the edited task
   const saveEditedTask = () => {
-    setTasks(tasks.map(t => 
-      t === tasks.find(task => task === editingTask.original) ? editingTask : t
-    ));
+    setTasks(tasks.map(t => t === editingTask.original ? editingTask : t));
     setEditingTask(null);
   };
 
-  // Delete a single task (that is selected) 
   const deleteTask = () => {
+    const task = editingTask.original;
     setConfirmation({
       message: 'Are you sure you want to delete this task?',
       onConfirm: () => {
-        setTasks(tasks.filter(t => t !== confirmation.taskToDelete));
+        setTasks(tasks => tasks.filter(t => t !== task));
         setEditingTask(null);
       },
       onCancel: () => {},
-      taskToDelete: editingTask.original, 
     });
   };
 
@@ -74,24 +92,8 @@ export default function Schedule() {
     });
   };
 
-  // Generate times based on startTime, endTime, and interval for time column
-  const generateTimes = () => {
-    const times = [];
-    for (let hour = startTime; hour <= endTime; hour++) {
-      for (let min = 0; min < 60; min += interval) {
-        times.push(`${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
-      }
-    }
-    return times;
-  };
-
-  const times = generateTimes();
-
-  // Toggle completed state directly from checkbox in schedule cell
   const toggleCompleted = (task) => {
-    setTasks(tasks.map(t =>
-      t === task ? { ...t, completed: !t.completed } : t
-    ));
+    setTasks(tasks.map(t => t === task ? { ...t, completed: !t.completed } : t));
   };
 
   const resetCheckboxes = () => {
@@ -104,7 +106,76 @@ export default function Schedule() {
     });
   };
 
-  const filteredTasks = (day, time) => tasks.filter(t => t.day === day && t.time === time);
+  const getTimeIndex = (time) => times.findIndex(t => t === time);
+
+  const renderCell = (day, time, rowIndex) => {
+  const overlappingTasks = tasks.filter(task => {
+    if (task.day !== day) return false;
+    const taskStart = getTimeIndex(task.time);
+    const taskEnd = taskStart + Math.ceil(task.duration / interval);
+    return rowIndex >= taskStart && rowIndex < taskEnd;
+  });
+
+  if (overlappingTasks.length === 0) {
+    return <td key={day + time} onClick={() => setCellTaskPopup({ day, time })} style={{ border: '1px solid var(--text-color)', minHeight: '50px', padding: '2px', verticalAlign: 'top', cursor: 'pointer' }} />;
+  }
+
+  if (overlappingTasks.some(task => getTimeIndex(task.time) === rowIndex)) {
+    const tasksToShow = overlappingTasks.filter(task => getTimeIndex(task.time) === rowIndex).slice(0, 3);
+    const totalTasks = tasksToShow.length;
+    return (
+      <td
+        key={day + time}
+        style={{
+          border: '1px solid var(--text-color)',
+          padding: '2px',
+          verticalAlign: 'top',
+          position: 'relative',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '2px' }}>
+          {tasksToShow.map((task, idx) => {
+            const width = `${100 / totalTasks}%`;
+            return (
+              <div
+                key={idx}
+                title={task.name}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCellTaskPopup({ day, time });
+                }}
+                style={{
+                  flex: `1 0 ${width}`,
+                  backgroundColor: task.color,
+                  color: 'black',
+                  padding: '2px 4px',
+                  fontSize: '9px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  borderRadius: '4px'
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    toggleCompleted(task);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ width: '12px', height: '12px', marginRight: '2px' }}
+                />
+                {task.name}
+              </div>
+            );
+          })}
+        </div>
+      </td>
+    );
+  }
+
+  return null;
+};
 
   return (
     <div style={{ padding: '20px', position: 'relative' }}>
@@ -125,13 +196,26 @@ export default function Schedule() {
           placeholder="Task Name"
           value={newTask.name}
           onChange={(e) => setNewTask({ ...newTask, name: e.target.value })}
-          style={{ marginLeft: '10px', width: '200px' }}
+          style={{ marginLeft: '10px', width: '200px', fontSize: (parseInt(getFontSize())) + 'px' }}
         />
         <select value={newTask.day} onChange={(e) => setNewTask({ ...newTask, day: e.target.value })} className="custom-select" style={{ marginLeft: '10px' }}>
           {[...daysSelect].map(day => <option key={day}>{day}</option>)}
         </select>
         <select value={newTask.time} onChange={(e) => setNewTask({ ...newTask, time: e.target.value })} className="custom-select" style={{ marginLeft: '10px' }}>
           {times.map(time => <option key={time}>{time}</option>)}
+        </select>
+        <select 
+          value={newTask.duration} 
+          onChange={(e) => setNewTask({ ...newTask, duration: parseInt(e.target.value) })} 
+          className="custom-select" 
+          style={{ marginLeft: '10px' }}
+        >
+          <option value={15}>15 min</option>
+          <option value={30}>30 min</option>
+          <option value={45}>45 min</option>
+          <option value={60}>1 hour</option>
+          <option value={90}>1.5 hours</option>
+          <option value={120}>2 hours</option>
         </select>
         <input
           type="color"
@@ -159,64 +243,95 @@ export default function Schedule() {
             ))}
           </tr>
         </thead>
+        
         <tbody>
-          {times.map(time => (
-            <tr key={'top' + time}>
-              <td style={{ whiteSpace: 'normal', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center' }}>{time}</td>
-              {daysSelect.map(day => (
-                <td
-                  key={day + time}
-                  onClick={() => setCellTaskPopup({ day, time })} // open add popup
-                  style={{
-                    border: '1px solid var(--text-color)',
-                    minHeight: '50px',
-                    whiteSpace: 'normal',
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word',
-                    verticalAlign: 'top',
-                    alignItems: 'center',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {filteredTasks(day, time).map((task, idx, arr) => (
-                    <div
-                      key={idx}
+          {times.map((time, rowIndex) => (
+            <tr key={time}>
+              <td style={{ textAlign: 'center', border: '1px solid var(--text-color)' }}>{time}</td>
+              {daysSelect.map(day => {
+                // Find all tasks that overlap this cell
+                const overlappingTasks = tasks.filter(task => {
+                  if (task.day !== day) return false;
+                  const taskStart = getTimeIndex(task.time);
+                  const taskEnd = taskStart + Math.ceil(task.duration / interval);
+                  return rowIndex >= taskStart && rowIndex < taskEnd;
+                });
+
+                // If no tasks, render an empty cell (add popup)
+                if (overlappingTasks.length === 0) {
+                  return (
+                    <td
+                      key={day + time}
+                      onClick={() => setCellTaskPopup({ day, time })}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        background: task.color,
-                        marginTop: '2px',
-                        marginBottom: idx === arr.length - 1 ? '10px' : '2px', //add bottom margin only for the last task
-                        padding: '5px 6px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        textDecoration: task.completed ? 'line-through' : 'none',
-                        whiteSpace: 'normal',
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        flexWrap: 'wrap',
+                        border: '1px solid var(--text-color)',
+                        minHeight: '50px',
+                        padding: '2px',
+                        verticalAlign: 'top',
+                        cursor: 'pointer'
                       }}
-                      onClick={(e) => {
-                        e.stopPropagation(); // prevent triggering add-task popup
-                        editTask({ ...task, original: task });
+                    />
+                  );
+                }
+
+                // Only render tasks that start at this cell (side by side)
+                const tasksToShow = overlappingTasks.filter(task => getTimeIndex(task.time) === rowIndex).slice(0, 3);
+                if (tasksToShow.length > 0) {
+                  const totalTasks = tasksToShow.length;
+                  return (
+                    <td
+                      key={day + time}
+                      style={{
+                        border: '1px solid var(--text-color)',
+                        padding: '2px',
+                        verticalAlign: 'top',
+                        position: 'relative',
                       }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={task.completed}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          toggleCompleted(task);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{ width: '16px', height: '16px', margin: 0, marginRight: '5px' }}
-                      />
-                      <span>{task.name}</span>
-                    </div>
-                  ))}
-                </td>
-              ))}
+                      <div style={{ display: 'flex', flexDirection: 'row', gap: '2px' }}>
+                        {tasksToShow.map((task, idx) => {
+                          const width = `${100 / totalTasks}%`;
+                          return (
+                            <div
+                              key={idx}
+                              title={task.name}
+                              onClick={e => {
+                                e.stopPropagation();
+                                setEditingTask({ ...task, original: task }); // Opens edit popup
+                              }}
+                              style={{
+                                flex: `1 0 ${width} - 2px`,
+                                backgroundColor: task.color,
+                                color: 'black',
+                                fontSize: '9px',
+                                whiteSpace: 'nowrap',
+                                padding: '1px 0px', 
+                                overflow: 'hidden',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={task.completed}
+                                onChange={e => {
+                                  e.stopPropagation();
+                                  toggleCompleted(task);
+                                }}
+                                onClick={e => e.stopPropagation()}
+                                style={{ width: '12px', height: '12px', marginRight: '2px' }}
+                              />
+                              {task.name}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </td>
+                  );
+                }
+
+                return null;
+              })}
             </tr>
           ))}
         </tbody>
@@ -237,7 +352,7 @@ export default function Schedule() {
               type="text"
               value={editingTask.name}
               onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
-              style={{ maxWidth: '100px', marginLeft: '10px', marginRight: '10px' }}
+              style={{ maxWidth: '100px', marginLeft: '10px', marginRight: '10px', fontSize: (parseInt(getFontSize())) + 'px'  }}
             />
             <select
               value={editingTask.day}
@@ -255,11 +370,25 @@ export default function Schedule() {
             >
               {times.map(time => <option key={time}>{time}</option>)}
             </select>
+            <select 
+              value={editingTask.duration} 
+              onChange={(e) => setEditingTask({ ...editingTask, duration: parseInt(e.target.value) })}
+              className="custom-select" 
+              style={{ marginLeft: '0px' }}
+            >
+
+              <option value={15}>15 min</option>
+              <option value={30}>30 min</option>
+              <option value={45}>45 min</option>
+              <option value={60}>1 hour</option>
+              <option value={90}>1.5 hours</option>
+              <option value={120}>2 hours</option>
+            </select>
             <input
               type="color"
               value={editingTask.color}
               onChange={(e) => setEditingTask({ ...editingTask, color: e.target.value })}
-              style={{ maxWidth: '50px', marginRight: '10px' }}
+              style={{ maxWidth: '50px', marginLeft: '10px' }}
             />
             <br />
             <br />
@@ -319,8 +448,21 @@ export default function Schedule() {
               placeholder="Task Name"
               value={cellTaskName}
               onChange={(e) => setCellTaskName(e.target.value)}
-              style={{ width: '200px', marginRight: '10px' }}
+              style={{ width: '200px', marginRight: '10px',fontSize: (parseInt(getFontSize())) + 'px'  }}
             />
+            <select 
+              value={cellTaskDuration} 
+              onChange={(e) => setCellTaskDuration(parseInt(e.target.value))} 
+              className="custom-select" 
+              style={{ marginRight: '10px' }}
+            >
+              <option value={15}>15 min</option>
+              <option value={30}>30 min</option>
+              <option value={45}>45 min</option>
+              <option value={60}>1 hour</option>
+              <option value={90}>1.5 hours</option>
+              <option value={120}>2 hours</option>
+            </select>
             <input
               type="color"
               value={cellTaskColor}
@@ -336,7 +478,8 @@ export default function Schedule() {
                   day: cellTaskPopup.day,
                   time: cellTaskPopup.time,
                   color: cellTaskColor,
-                  completed: false
+                  completed: false, 
+                  duration: cellTaskDuration
                 }]);
                 setCellTaskPopup(null);
                 setCellTaskName('');
