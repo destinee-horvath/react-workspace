@@ -109,79 +109,72 @@ export default function Schedule() {
   const getTimeIndex = (time) => times.findIndex(t => t === time);
 
   const renderCell = (day, time, rowIndex) => {
-  const overlappingTasks = tasks.filter(task => {
-    if (task.day !== day) return false;
-    const taskStart = getTimeIndex(task.time);
-    const taskEnd = taskStart + Math.ceil(task.duration / interval);
-    return rowIndex >= taskStart && rowIndex < taskEnd;
-  });
+    const overlappingTasks = tasks.filter(task => {
+      if (task.day !== day) return false;
+      const taskStart = getTimeIndex(task.time);
+      const taskEnd = taskStart + Math.ceil(task.duration / interval);
+      return rowIndex >= taskStart && rowIndex < taskEnd;
+    });
 
-  if (overlappingTasks.length === 0) {
-    return <td key={day + time} onClick={() => setCellTaskPopup({ day, time })} style={{ border: '1px solid var(--text-color)', minHeight: '50px', padding: '2px', verticalAlign: 'top', cursor: 'pointer' }} />;
-  }
+    if (overlappingTasks.length === 0) {
+      return <td key={day + time} onClick={() => setCellTaskPopup({ day, time })} style={{ border: '1px solid var(--text-color)', minHeight: '50px', padding: '2px', verticalAlign: 'top', cursor: 'pointer' }} />;
+    }
 
-  if (overlappingTasks.some(task => getTimeIndex(task.time) === rowIndex)) {
-    const tasksToShow = overlappingTasks.filter(task => getTimeIndex(task.time) === rowIndex).slice(0, 3);
-    const totalTasks = tasksToShow.length;
-    return (
-      <td
-        key={day + time}
-        style={{
-          border: '1px solid var(--text-color)',
-          padding: '2px',
-          verticalAlign: 'top',
-          position: 'relative',
-        }}
-      >
-        <div style={{ position: 'relative', height: '100%' }}>
-      {tasksToShow.map((task, idx) => {
-        const blockHeight = `${100 / totalTasks}%`; // half or third depending on count
-        return (
-          <div
-            key={idx}
-            title={task.name}
-            onClick={(e) => {
-              e.stopPropagation();
-              setCellTaskPopup({ day, time });
-            }}
-            style={{
-              position: 'absolute',
-              top: `calc(${blockHeight} * ${idx})`,
-              left: '5%',
-              width: '90%',
-              height: blockHeight,
-              backgroundColor: task.color,
-              color: 'black',
-              fontSize: '9px',
-              borderRadius: '8px',
-              padding: '2px 4px',
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={task.completed}
-              onChange={(e) => {
-                e.stopPropagation();
-                toggleCompleted(task);
-              }}
-              onClick={(e) => e.stopPropagation()}
-              style={{ width: '12px', height: '12px', marginRight: '2px' }}
-            />
-            <span style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>{task.name}</span>
+    if (overlappingTasks.some(task => getTimeIndex(task.time) === rowIndex)) {
+      const tasksToShow = overlappingTasks.filter(task => getTimeIndex(task.time) === rowIndex).slice(0, 3);
+      const totalTasks = tasksToShow.length;
+      return (
+        <td
+          key={day + time}
+          style={{
+            border: '1px solid var(--text-color)',
+            padding: '2px',
+            verticalAlign: 'top',
+            position: 'relative',
+          }}
+        >
+          <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {tasksToShow.map((task, idx) => (
+              <div
+                key={idx}
+                title={task.name}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCellTaskPopup({ day, time });
+                }}
+                style={{
+                  backgroundColor: task.color,
+                  color: 'black',
+                  fontSize: '9px',
+                  borderRadius: '8px',
+                  padding: '4px 6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  textDecoration: task.completed ? 'line-through' : 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    toggleCompleted(task);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ width: '12px', height: '12px', marginRight: '4px' }}
+                />
+                <span>{task.name}</span>
+              </div>
+            ))}
           </div>
-        );
-      })}
-    </div>
+        </td>
+      );
+    }
 
-      </td>
-    );
-  }
-
-  return null;
-};
+    return null;
+  };
 
   return (
     <div style={{ padding: '20px', position: 'relative' }}>
@@ -310,6 +303,7 @@ export default function Schedule() {
                           color: 'black',
                           minWidth: 0,
                           maxWidth: '80px',
+                          borderRadius: '10px',
                           boxSizing: 'border-box',
                           cursor: 'pointer'
                         }}

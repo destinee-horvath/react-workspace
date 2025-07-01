@@ -25,8 +25,6 @@ export default function ScheduleTableOnly() {
 
   const times = generateTimes();
 
-  const filteredTasks = (day, time) => tasks.filter(t => t.day === day && t.time === time);
-
   const toggleCompleted = (task) => {
     const updatedTasks = tasks.map(t =>
       t === task ? { ...t, completed: !t.completed } : t
@@ -34,6 +32,8 @@ export default function ScheduleTableOnly() {
     setTasks(updatedTasks);
     localStorage.setItem('schedule-tasks', JSON.stringify(updatedTasks));
   };
+
+  const getTimeIndex = (time) => times.findIndex(t => t === time);
 
   return (
     <div style={{ padding: '20px' }}>
@@ -54,45 +54,72 @@ export default function ScheduleTableOnly() {
           </tr>
         </thead>
         <tbody>
-          {times.map(time => (
+          {times.map((time, rowIndex) => (
             <tr key={time}>
               <td style={{ textAlign: 'center' }}>{time}</td>
-              {daysSelect.map(day => (
-                <td
-                  key={day + time}
-                  style={{
-                    border: '1px solid var(--text-color)',
-                    minHeight: '50px',
-                    verticalAlign: 'top',
-                    textAlign: 'center',
-                    whiteSpace: 'normal',
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word'
-                  }}
-                >
-                  {filteredTasks(day, time).map((task, idx, arr) => (
-                    <div
-                      key={idx}
-                      style={{
-                        background: task.color,
-                        marginTop: '2px',
-                        marginBottom: idx === arr.length - 1 ? '10px' : '2px',
-                        padding: '5px 6px',
-                        borderRadius: '4px',
-                        textDecoration: task.completed ? 'line-through' : 'none'
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={task.completed}
-                        onChange={() => toggleCompleted(task)}
-                        style={{ width: '16px', height: '16px', marginRight: '5px' }}
-                      />
-                      <span>{task.name}</span>
-                    </div>
-                  ))}
-                </td>
-              ))}
+              {daysSelect.map(day => {
+                const startingTasks = tasks.filter(task =>
+                  task.day === day && getTimeIndex(task.time) === rowIndex
+                );
+
+                if (startingTasks.length > 0) {
+                  return startingTasks.map((task, idx) => {
+                    const rowSpan = Math.ceil(task.duration / interval);
+                    return (
+                      <td
+                        key={day + time + idx}
+                        rowSpan={rowSpan}
+                        style={{
+                          border: '1px solid var(--text-color)',
+                          padding: '2px',
+                          verticalAlign: 'top',
+                          backgroundColor: task.color,
+                          color: 'black',
+                          minWidth: 0,
+                          maxWidth: '80px',
+                          boxSizing: 'border-box',
+                          cursor: 'pointer',
+                          borderRadius: '8px',
+                          textDecoration: task.completed ? 'line-through' : 'none'
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleCompleted(task);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ width: '12px', height: '12px', marginRight: '5px' }}
+                        />
+                        {task.name}
+                      </td>
+                    );
+                  });
+                }
+
+                const isCovered = tasks.some(task => {
+                  if (task.day !== day) return false;
+                  const taskStart = getTimeIndex(task.time);
+                  const taskEnd = taskStart + Math.ceil(task.duration / interval);
+                  return rowIndex > taskStart && rowIndex < taskEnd;
+                });
+                if (isCovered) return null;
+
+                return (
+                  <td
+                    key={day + time}
+                    style={{
+                      border: '1px solid var(--text-color)',
+                      minHeight: '50px',
+                      padding: '2px',
+                      verticalAlign: 'top',
+                      cursor: 'pointer'
+                    }}
+                  />
+                );
+              })}
             </tr>
           ))}
         </tbody>
