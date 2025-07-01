@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRef } from 'react'; //for date input 
 import Popup from './popups/DeleteConfirmation'; 
 
@@ -19,6 +19,9 @@ export default function ToDo() {
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
+
+  const [sortKey, setSortKey] = useState('');
+  const [sortAsc, setSortAsc] = useState(true);
 
   const isValidDate = (dateString) => /^\d{4}-\d{2}-\d{2}$/.test(dateString);
   const dateInputRef = useRef();
@@ -115,12 +118,47 @@ export default function ToDo() {
     return deadline && new Date(deadline) < new Date();
   };
 
-  const sortedTasks = [...tasks].sort((a, b) => {
-    if (isOverdue(a.deadline) && !isOverdue(b.deadline)) return -1;
-    if (!isOverdue(a.deadline) && isOverdue(b.deadline)) return 1;
-    return getPriorityValue(b.priority) - getPriorityValue(a.priority);
-  });
+  // Default sort by priority and then by deadline
+  // const sortedTasks = [...tasks].sort((a, b) => {
+  //   if (isOverdue(a.deadline) && !isOverdue(b.deadline)) return -1;
+  //   if (!isOverdue(a.deadline) && isOverdue(b.deadline)) return 1;
+  //   return getPriorityValue(b.priority) - getPriorityValue(a.priority);
+  // });
 
+
+  const sortedTasks = useMemo(() => {
+    if (!sortKey) return tasks;
+
+    return [...tasks].sort((a, b) => {
+      let valA = a[sortKey] || '';
+      let valB = b[sortKey] || '';
+
+      if (sortKey === 'priority') {
+        valA = getPriorityValue(valA);
+        valB = getPriorityValue(valB);
+      } else if (sortKey === 'deadline') {
+        valA = isValidDate(valA) ? new Date(valA).getTime() : 0;
+        valB = isValidDate(valB) ? new Date(valB).getTime() : 0;
+      } else if (sortKey === 'text') {
+        valA = valA.toString().toLowerCase();
+        valB = valB.toString().toLowerCase();
+      } else {
+        valA = valA.toString();
+        valB = valB.toString();
+      }
+
+      if (valA === valB) return 0;
+      return sortAsc ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+    });
+  }, [tasks, sortKey, sortAsc]);
+
+  const sortTasks = (key) => {
+    const asc = sortKey === key ? !sortAsc : true;
+    setSortKey(key);
+    setSortAsc(asc);
+  };
+
+  
   return (
     <div style={{ padding: '20px' }}>
       <h1 style={{ textAlign: 'center' }}>To-Do</h1>
@@ -163,14 +201,23 @@ export default function ToDo() {
       <table style={{ width: '90%', margin: '0 auto', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            {/* checkbox header */}
             <th style={{ borderBottom: '2px solid var(--text-color)', padding: '0px', width: '10px' }}></th>
-            <th style={{ borderBottom: '2px solid var(--text-color)', padding: '10px', textAlign: 'left' }}>Task</th>
-            <th style={{ borderBottom: '2px solid var(--text-color)', padding: '10px', textAlign: 'left' }}>Deadline</th>
-            <th style={{ borderBottom: '2px solid var(--text-color)', padding: '10px', textAlign: 'left' }}>Priority</th>
+            <th style={{ borderBottom: '2px solid var(--text-color)', padding: '10px', textAlign: 'left' }}>
+              Task
+              <button onClick={() => sortTasks('text')} className="button-rectangle-tiny" style={{ marginLeft: '5px' }}>↕</button>
+            </th>
+            <th style={{ borderBottom: '2px solid var(--text-color)', padding: '10px', textAlign: 'left' }}>
+              Deadline
+              <button onClick={() => sortTasks('deadline')} className="button-rectangle-tiny" style={{ marginLeft: '5px' }}>↕</button>
+            </th>
+            <th style={{ borderBottom: '2px solid var(--text-color)', padding: '10px', textAlign: 'left' }}>
+              Priority
+              <button onClick={() => sortTasks('priority')} className="button-rectangle-tiny" style={{ marginLeft: '5px' }}>↕</button>
+            </th>
             <th style={{ borderBottom: '2px solid var(--text-color)', padding: '10px', textAlign: 'left' }}>Actions</th>
           </tr>
         </thead>
+
 
         <tbody>
           {sortedTasks.map(task => (
