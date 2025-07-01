@@ -133,43 +133,49 @@ export default function Schedule() {
           position: 'relative',
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '2px' }}>
-          {tasksToShow.map((task, idx) => {
-            const width = `${100 / totalTasks}%`;
-            return (
-              <div
-                key={idx}
-                title={task.name}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCellTaskPopup({ day, time });
-                }}
-                style={{
-                  flex: `1 0 ${width}`,
-                  backgroundColor: task.color,
-                  color: 'black',
-                  padding: '2px 4px',
-                  fontSize: '9px',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  borderRadius: '4px'
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    toggleCompleted(task);
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ width: '12px', height: '12px', marginRight: '2px' }}
-                />
-                {task.name}
-              </div>
-            );
-          })}
-        </div>
+        <div style={{ position: 'relative', height: '100%' }}>
+      {tasksToShow.map((task, idx) => {
+        const blockHeight = `${100 / totalTasks}%`; // half or third depending on count
+        return (
+          <div
+            key={idx}
+            title={task.name}
+            onClick={(e) => {
+              e.stopPropagation();
+              setCellTaskPopup({ day, time });
+            }}
+            style={{
+              position: 'absolute',
+              top: `calc(${blockHeight} * ${idx})`,
+              left: '5%',
+              width: '90%',
+              height: blockHeight,
+              backgroundColor: task.color,
+              color: 'black',
+              fontSize: '9px',
+              borderRadius: '8px',
+              padding: '2px 4px',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={(e) => {
+                e.stopPropagation();
+                toggleCompleted(task);
+              }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: '12px', height: '12px', marginRight: '2px' }}
+            />
+            <span style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>{task.name}</span>
+          </div>
+        );
+      })}
+    </div>
+
       </td>
     );
   }
@@ -214,8 +220,42 @@ export default function Schedule() {
           <option value={30}>30 min</option>
           <option value={45}>45 min</option>
           <option value={60}>1 hour</option>
+          <option value={75}>1.25 hours</option>
           <option value={90}>1.5 hours</option>
+          <option value={105}>1.75 hours</option>
           <option value={120}>2 hours</option>
+          <option value={135}>2.25 hours</option>
+          <option value={150}>2.5 hours</option>
+          <option value={165}>2.75 hours</option>
+          <option value={180}>3 hours</option>
+          <option value={195}>3.25 hours</option>
+          <option value={210}>3.5 hours</option>
+          <option value={225}>3.75 hours</option>
+          <option value={240}>4 hours</option>
+          <option value={255}>4.25 hours</option>
+          <option value={270}>4.5 hours</option>
+          <option value={285}>4.75 hours</option>
+          <option value={300}>5 hours</option>
+          <option value={315}>5.25 hours</option>
+          <option value={330}>5.5 hours</option>
+          <option value={345}>5.75 hours</option>
+          <option value={360}>6 hours</option>
+          <option value={375}>6.25 hours</option>
+          <option value={390}>6.5 hours</option>
+          <option value={405}>6.75 hours</option>
+          <option value={420}>7 hours</option>
+          <option value={435}>7.25 hours</option>
+          <option value={450}>7.5 hours</option>
+          <option value={465}>7.75 hours</option>
+          <option value={480}>8 hours</option>
+          <option value={495}>8.25 hours</option>
+          <option value={510}>8.5 hours</option>
+          <option value={525}>8.75 hours</option>
+          <option value={540}>9 hours</option>
+          <option value={555}>9.25 hours</option>
+          <option value={570}>9.5 hours</option>
+          <option value={585}>9.75 hours</option>
+          <option value={600}>10 hours</option>
         </select>
         <input
           type="color"
@@ -363,13 +403,47 @@ export default function Schedule() {
               className="custom-select" 
               style={{ marginLeft: '0px' }}
             >
-
               <option value={15}>15 min</option>
               <option value={30}>30 min</option>
               <option value={45}>45 min</option>
               <option value={60}>1 hour</option>
+              <option value={75}>1.25 hours</option>
               <option value={90}>1.5 hours</option>
+              <option value={105}>1.75 hours</option>
               <option value={120}>2 hours</option>
+              <option value={135}>2.25 hours</option>
+              <option value={150}>2.5 hours</option>
+              <option value={165}>2.75 hours</option>
+              <option value={180}>3 hours</option>
+              <option value={195}>3.25 hours</option>
+              <option value={210}>3.5 hours</option>
+              <option value={225}>3.75 hours</option>
+              <option value={240}>4 hours</option>
+              <option value={255}>4.25 hours</option>
+              <option value={270}>4.5 hours</option>
+              <option value={285}>4.75 hours</option>
+              <option value={300}>5 hours</option>
+              <option value={315}>5.25 hours</option>
+              <option value={330}>5.5 hours</option>
+              <option value={345}>5.75 hours</option>
+              <option value={360}>6 hours</option>
+              <option value={375}>6.25 hours</option>
+              <option value={390}>6.5 hours</option>
+              <option value={405}>6.75 hours</option>
+              <option value={420}>7 hours</option>
+              <option value={435}>7.25 hours</option>
+              <option value={450}>7.5 hours</option>
+              <option value={465}>7.75 hours</option>
+              <option value={480}>8 hours</option>
+              <option value={495}>8.25 hours</option>
+              <option value={510}>8.5 hours</option>
+              <option value={525}>8.75 hours</option>
+              <option value={540}>9 hours</option>
+              <option value={555}>9.25 hours</option>
+              <option value={570}>9.5 hours</option>
+              <option value={585}>9.75 hours</option>
+              <option value={600}>10 hours</option>
+
             </select>
             <input
               type="color"
